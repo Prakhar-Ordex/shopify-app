@@ -91,6 +91,11 @@ export default function Index() {
                   url="/app/products"
                 >
                   Create Product
+                </Button>  
+                <Button
+                  url="/app/subscription-plans"
+                >
+                  Subscriptions
                 </Button>
               </InlineStack>
             </BlockStack>

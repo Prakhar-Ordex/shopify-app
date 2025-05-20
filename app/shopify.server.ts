@@ -16,7 +16,7 @@ const mongoUrl = new URL(mongoUrlString);
 // Create MongoDB session storage with correct parameters
 const mongoSessionStorage = new MongoDBSessionStorage(
   mongoUrl,
- "Donate_Me_Test_app"
+ "donate-me-test-app"
 );
 
 const shopify = shopifyApp({
