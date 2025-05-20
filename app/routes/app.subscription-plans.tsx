@@ -141,7 +141,7 @@ export default function SubscriptionPlans() {
           <Layout.Section>
             <Banner 
               title="Error loading plans" 
-              status="critical"
+              tone="critical"
               onDismiss={() => {}}
             >
               <p>{error}</p>
@@ -153,7 +153,7 @@ export default function SubscriptionPlans() {
           <Layout.Section>
             <Banner 
               title="Subscription Error" 
-              status="critical"
+              tone="critical"
               onDismiss={() => setSubscribeError(null)}
             >
               <p>{subscribeError}</p>
@@ -183,7 +183,7 @@ export default function SubscriptionPlans() {
         <Layout>
           {Array.isArray(plans) && plans.length > 0 ? (
             plans.map((plan) => (
-              <Layout.Section key={plan.id} oneThird>
+              <Layout.Section key={plan.id} variant="oneThird">
                 <Card padding="400">
                   <BlockStack gap="400">
                     <BlockStack gap="200">

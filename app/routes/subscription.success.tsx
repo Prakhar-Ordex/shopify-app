@@ -76,7 +76,7 @@ export default function SubscriptionSuccess() {
         <Layout.Section>
           <Banner 
             title="Error loading subscription details" 
-            status="critical"
+            tone="critical"
           >
             <p>{error}</p>
             <Button url={`/app/plans${shop ? `?shop=${shop}` : ''}`}>View Plans</Button>
@@ -110,8 +110,8 @@ export default function SubscriptionSuccess() {
                 </Text>
                 
                 <InlineStack gap="300">
-                  <Button url={`/app${shop ? `?shop=${shop}` : ''}`} primary>Go to Dashboard</Button>
-                  <Button url={`/app/plans${shop ? `?shop=${shop}` : ''}`} plain>View All Plans</Button>
+                  <Button url={`/app${shop ? `?shop=${shop}` : ''}`} variant="primary">Go to Dashboard</Button>
+                  <Button url={`/app/plans${shop ? `?shop=${shop}` : ''}`} variant="plain">View All Plans</Button>
                 </InlineStack>
               </BlockStack>
             </Card>

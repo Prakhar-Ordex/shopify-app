@@ -5,7 +5,7 @@ import { TitleBar } from '@shopify/app-bridge-react';
 import { AlertTriangleIcon } from '@shopify/polaris-icons';
 import { authenticate } from 'app/shopify.server';
 
-export const loader = async ({ request }) => {
+export const loader = async ({ request }:any) => {
   try {
     // Extract shop from query params in case we're coming from a redirect
     const url = new URL(request.url);
@@ -52,7 +52,7 @@ export default function SubscriptionError() {
               
               <Banner
                 title="We encountered a problem"
-                status="critical"
+                tone="critical"
               >
                 <p>{errorMessage}</p>
               </Banner>
@@ -69,8 +69,8 @@ export default function SubscriptionError() {
               </BlockStack>
               
               <InlineStack gap="300">
-                <Button url={`/app/plans${shop ? `?shop=${shop}` : ''}`} primary>Try Again</Button>
-                <Button url={`/app${shop ? `?shop=${shop}` : ''}`} plain>Return to Dashboard</Button>
+                <Button url={`/app/plans${shop ? `?shop=${shop}` : ''}`} variant="primary">Try Again</Button>
+                <Button url={`/app${shop ? `?shop=${shop}` : ''}`} variant="plain">Return to Dashboard</Button>
               </InlineStack>
             </BlockStack>
           </Card>
