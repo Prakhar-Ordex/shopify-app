@@ -18,14 +18,44 @@ import { useEffect, useState, useCallback } from "react"; // Import useCallback
 import { Redirect } from "@shopify/app-bridge/actions";
 import { authenticate } from "app/shopify.server";
 import { getSessionToken } from "@shopify/app-bridge-utils";
+import { useLocation } from "@remix-run/react";
 
 export default function AdditionalPage() {
   const app: any = useAppBridge();
   const [shopOriginFromBridge, setShopOriginFromBridge] = useState<string | null>(null);
-
+  const location = useLocation();
+  const [chargeId, setChargeId] = useState<string | null>(null);
+  const [plan,setPlan]=useState<string|null>(null)
+  const [subscriptionDetails, setSubscriptionDetails] = useState<any>(null);
   useEffect(() => {
+    const params = new URLSearchParams(location?.search);
+    const charge_id = params.get("charge_id");
+    const plan = params.get("plan");
+    setPlan(plan)
+    setChargeId(charge_id);
+  }, [location?.search]);
+    console.log("chargeId",chargeId);
+    useEffect(() => {
+      const fetchSubscription = async () => {
+        if (!chargeId) return;
+  
+        try {
+          const response = await fetch(`/api/get-subscription?charge_id=${chargeId}&plan=${plan}`);
+          const data = await response.json();
+          setSubscriptionDetails(data);
+        } catch (error) {
+          console.error("Failed to fetch subscription details:", error);
+        }
+      };
+  
+      fetchSubscription();
+    }, [chargeId,plan]);
+    console.log("subscription",subscriptionDetails);
+    
+  useEffect(() => {
+    
       if (app?.hostOrigin) {
-          const url = new URL(app.hostOrigin);
+          const url = new URL(app.hostOrigin);          
           setShopOriginFromBridge(url.hostname);
       } else {
           console.warn("App Bridge hostOrigin not available yet.");

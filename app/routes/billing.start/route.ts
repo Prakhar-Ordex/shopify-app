@@ -44,9 +44,10 @@ export const loader = async ({ request }: any) => {
       }
     `;
 
+    const returnUrl = `https://admin.shopify.com/store/prakhar-09/apps/innovative-conversion-app-11/app/additional?plan=${selectedPlanId}`;
     // Construct the return URL for confirmation
     // Make sure to include both shop and plan parameters in the callback URL
-    const returnUrl = `${process.env.SHOPIFY_APP_URL}/billing/callback?shop=${session.shop}&plan=${selectedPlanId}`;
+    // const returnUrl = `${process.env.SHOPIFY_APP_URL}/billing/callback?shop=${session.shop}&plan=${selectedPlanId}`;
 
     // Prepare the request body with plan details
     const body = {
@@ -89,7 +90,8 @@ export const loader = async ({ request }: any) => {
 
     // Parse the response from Shopify
     const parsed = await response.json();
-    
+      console.log("parsed",parsed);
+      
     // Check for user errors in the response
     const userErrors = parsed?.data?.appSubscriptionCreate?.userErrors;
     if (userErrors && userErrors.length > 0) {
