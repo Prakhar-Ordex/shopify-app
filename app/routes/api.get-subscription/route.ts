@@ -1,22 +1,44 @@
-import { json } from "@remix-run/node";
 import { authenticate } from "../../shopify.server"; // Your existing auth util
 import { createSubscription, getPlanById } from "app/models/plans.server";
 
 export async function loader({ request }: { request: Request }) {
-    const { session } = await authenticate.admin(request);
+    const { admin,session } = await authenticate.admin(request);
     const url = new URL(request.url);
     const chargeId = url.searchParams.get("charge_id");
     const planId = url.searchParams.get("plan");
 
+    if (!session || !session.shop) {
+        return new Response(
+          JSON.stringify({ error: "Authentication failed" }), 
+          { status: 401, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!planId) {
+        return new Response(
+          JSON.stringify({ error: "Plan ID is required" }), 
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      
+
     const planConfig = await getPlanById(planId as string);
 
     if (!planConfig) {
-        console.error(`Invalid plan ID: ${planId}`);
+        // console.error(`Invalid plan ID: ${planId}`);
+        return new Response(
+            JSON.stringify({ error: "Invalid plan ID" }), 
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
     }
 
 
     if (!chargeId || !session?.accessToken) {
-        return json({ error: "Missing charge ID or session" }, { status: 400 });
+        // return json({ error: "Missing charge ID or session" }, { status: 400 });
+        return new Response(
+            JSON.stringify({ error: "Missing charge ID or session" }), 
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
     }
 
     const query = `
@@ -25,6 +47,8 @@ export async function loader({ request }: { request: Request }) {
         ... on AppSubscription {
           id
           status
+          name
+          test
           createdAt
           currentPeriodEnd
         }
@@ -32,44 +56,72 @@ export async function loader({ request }: { request: Request }) {
     }
   `;
 
-    const response = await fetch(`https://${session.shop}/admin/api/2024-01/graphql.json`, {
-        method: "POST",
-        headers: {
-            "X-Shopify-Access-Token": session.accessToken,
-            "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query }),
-    });
-
+    const response = await admin.graphql(query);
     //   const result = await response.json();
     const responseData = await response.json();
+
+   
     console.log('Subscription verification response:', responseData);
 
-    const subscriptionStatus = responseData?.data?.node?.status;
+    const subscriptionData = responseData?.data?.node;
+    const subscriptionStatus = subscriptionData?.status;
 
-    // If GraphQL returns valid data, process it
-    if (subscriptionStatus) {
-        // If subscription is active, save it to the database
-        if (subscriptionStatus === 'ACTIVE') {
-            const newSubscription = await createSubscription({
-                shopDomain: session.shop,
-                planId: planId as string,
-                planName: planConfig.name,
-                chargeId: chargeId,
-                status: 'active',
-                price: planConfig.price,
-                currency: 'USD',
-                interval: planConfig.interval || 'EVERY_30_DAYS',
-                trialDays: planConfig.trialDays,
-                features: planConfig.features,
-                createdAt: new Date(),
-                currentPeriodEnd: responseData?.data?.node?.currentPeriodEnd
-                    ? new Date(responseData.data.node.currentPeriodEnd)
-                    : null
-            });
+    if (!subscriptionData) {
+      return new Response(
+        JSON.stringify({ error: "Subscription not found" }), 
+        { status: 404, headers: { "Content-Type": "application/json" } }
+      );
+    }
 
-            console.log(`Subscription created for shop ${session.shop} with plan ${planConfig.name}`, newSubscription);
-            return json(responseData);
-        }
+    // Process subscription based on status
+    if (subscriptionStatus === 'ACTIVE') {
+      try {
+        const newSubscription = await createSubscription({
+          shopDomain: session.shop,
+          planId: planId as string,
+          planName: planConfig.name,
+          chargeId: chargeId,
+          status: 'active',
+          price: planConfig.price,
+          currency: 'USD',
+          interval: planConfig.interval || 'EVERY_30_DAYS',
+          trialDays: planConfig.trialDays,
+          features: planConfig.features,
+          createdAt: new Date(),
+          currentPeriodEnd: subscriptionData.currentPeriodEnd
+            ? new Date(subscriptionData.currentPeriodEnd)
+            : null
+        });
+
+        console.log(`Subscription created for shop ${session.shop} with plan ${planConfig.name}`, newSubscription);
+        
+        return new Response(
+          JSON.stringify({
+            ...subscriptionData,
+            plan: {
+              id: planConfig.id,
+              name: planConfig.name,
+              price: planConfig.price,
+              interval: planConfig.interval,
+              features: planConfig.features
+            }
+          }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      } catch (error) {
+        console.error('Error creating subscription:', error);
+        return new Response(
+          JSON.stringify({ error: "Failed to create subscription record" }), 
+          { status: 500, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    } else {
+      return new Response(
+        JSON.stringify({ 
+          error: "Subscription is not active", 
+          status: subscriptionStatus 
+        }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
     }
 }

@@ -3,7 +3,7 @@
 client_id = "e999a76353b43bd93032f737843c7d1e"
 name = "innovative-conversion-app"
 handle = "innovative-conversion-app-11"
-application_url = "https://examined-employed-atmosphere-yoga.trycloudflare.com"
+application_url = "https://slovakia-heated-undertake-tb.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://examined-employed-atmosphere-yoga.trycloudflare.com/auth/callback",
-  "https://examined-employed-atmosphere-yoga.trycloudflare.com/auth/shopify/callback",
-  "https://examined-employed-atmosphere-yoga.trycloudflare.com/api/auth/callback"
+  "https://slovakia-heated-undertake-tb.trycloudflare.com/auth/callback",
+  "https://slovakia-heated-undertake-tb.trycloudflare.com/auth/shopify/callback",
+  "https://slovakia-heated-undertake-tb.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
